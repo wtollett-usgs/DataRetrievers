@@ -42,9 +42,8 @@ def load_config(conf):
     logger.info('Parsing Config')
     with open(conf, 'r') as infile:
         for line in infile:
-            logger.info('Adding station: %s' % line.rstrip())
+            logger.info(f'Adding station: {line.rstrip()}')
             split = line.split(',')
-            print split
             sites[split[0]] = split[1]
     return sites
 
@@ -77,13 +76,12 @@ def datalogger_to_valve_and_archive(sites):
         hour = 23
     day = str(day).zfill(3)
     hour = str(hour).zfill(2)
-    logger.info('Grabbing data for year: %s, day: %s, hour: %s'
-                % (year, day, hour))
+    logger.info(f'Grabbing data for year: {year}, day: {day}, hour: {hour}')
     remotefile = path.format(year, day, hour)
     archiveloc = archive.format(year, day)
-    for key, val in sites.iteritems():
+    for key, val in sites.items():
         localfile = tmpfile.format(key, day, hour)
-        logger.info('Getting file (%s) for station: %s' % (remotefile, key))
+        logger.info(f'Getting file ({remotefile}) for station: {key}')
         try:
             # Retrieve the file
             ftp = FTP(val)
@@ -94,18 +92,18 @@ def datalogger_to_valve_and_archive(sites):
             # Copy it to the local archive
             if not os.path.exists(archiveloc):
                 os.mkdir(archiveloc)
-            logger.info('Copying to %s' % archiveloc)
+            logger.info(f'Copying to {archiveloc}')
             shutil.copy2(localfile, archiveloc)
 
             # Now parse local file, moving from microseconds to milliseconds
             # Then copy to the lamp directory
-            modfile = '%smod.dat' % localfile[:-4]
+            modfile = f'{localfile[:-4]}mod.dat'
             convert_times(localfile, modfile)
-            logger.info('Copying to %s\n' % lamp)
+            logger.info(f'Copying to {lamp}\n')
             shutil.copy2(modfile, lamp)
             os.remove(modfile)
             os.remove(localfile)
-        except Exception, e:
+        except Exception as e:
             logger.error(e)
 
 

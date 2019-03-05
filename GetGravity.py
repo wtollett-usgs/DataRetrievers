@@ -14,6 +14,7 @@ import argparse
 import logging
 import os
 import shutil
+import tomputils.util as tutil
 
 from datetime import datetime, timedelta
 from ftplib import FTP
@@ -29,12 +30,6 @@ tmpfile = '/tmp/{0}{1}{2}.dat'
 lamp = '/lamp/valve3/def/gravity/raw'
 archive = '/def/gravity/data/raw/{0}/{1}'
 logfile = '/def/gravity/log/grav.log'
-
-# Logging
-logger = logging.getLogger('GetGravity')
-logger.setLevel(logging.INFO)
-fh = logging.FileHandler(logfile)
-logger.addHandler(fh)
 
 
 def load_config(conf):
@@ -108,6 +103,15 @@ def datalogger_to_valve_and_archive(sites):
 
 
 if __name__ == '__main__':
+    global logger
+    logger = tutil.setup_logging("GetGravity")
+    if 'PYLOGLEVEL' in os.environ:
+        level = logging.getLevelName(os.getenv('PYLOGLEVEL', 'DEBUG'))
+        logger.setLevel(level)
+
+    logger.info('Starting')
     args = parser.parse_args()
     sites = load_config(args.config)
     datalogger_to_valve_and_archive(sites)
+    logger.info('Finished')
+    logging.shutdown()
